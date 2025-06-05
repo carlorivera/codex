@@ -137,10 +137,14 @@ impl ModelClient {
                     instructions: None,
                 })
             })?;
-            let res = self
-                .client
-                .post(&url)
-                .bearer_auth(api_key)
+            let mut req_builder = self.client.post(&url);
+            if api_key == "USE_ENTRA_ID" {
+                let token = self.provider.bearer_token().await?;
+                req_builder = req_builder.bearer_auth(token);
+            } else {
+                req_builder = req_builder.bearer_auth(api_key);
+            }
+            let res = req_builder
                 .header("OpenAI-Beta", "responses=experimental")
                 .header(reqwest::header::ACCEPT, "text/event-stream")
                 .json(&payload)

@@ -77,6 +77,27 @@ impl ModelProviderInfo {
             None => Ok(None),
         }
     }
+
+    /// Returns a bearer token using Azure Entra ID authentication.
+    /// Only used when [`api_key()`] returns `Ok(Some("USE_ENTRA_ID"))`.
+    pub async fn bearer_token(&self) -> crate::error::Result<String> {
+        use azure_core::credentials::TokenCredential;
+        use azure_identity::DefaultAzureCredential;
+
+        let credential = DefaultAzureCredential::new()
+            .map_err(|e| crate::error::CodexErr::EnvVar(EnvVarError {
+                var: "USE_ENTRA_ID".to_string(),
+                instructions: Some(e.to_string()),
+            }))?;
+        let token = credential
+            .get_token(&["https://cognitiveservices.azure.com/.default"])
+            .await
+            .map_err(|e| crate::error::CodexErr::EnvVar(EnvVarError {
+                var: "USE_ENTRA_ID".to_string(),
+                instructions: Some(e.to_string()),
+            }))?;
+        Ok(token.token.secret().to_string())
+    }
 }
 
 /// Built-in default provider list.
@@ -101,6 +122,16 @@ pub fn built_in_model_providers() -> HashMap<String, ModelProviderInfo> {
                 base_url: "https://openrouter.ai/api/v1".into(),
                 env_key: Some("OPENROUTER_API_KEY".into()),
                 env_key_instructions: None,
+                wire_api: WireApi::Chat,
+            },
+        ),
+        (
+            "azure",
+            P {
+                name: "Azure OpenAI".into(),
+                base_url: "https://YOUR-RESOURCE.openai.azure.com/openai/deployments/YOUR-DEPLOYMENT".into(),
+                env_key: Some("AZURE_OPENAI_KEY".into()),
+                env_key_instructions: Some("Set to the Azure OpenAI API key or 'USE_ENTRA_ID' for Entra ID auth.".into()),
                 wire_api: WireApi::Chat,
             },
         ),

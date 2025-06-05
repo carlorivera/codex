@@ -129,7 +129,12 @@ pub(crate) async fn stream_chat_completions(
 
         let mut req_builder = client.post(&url);
         if let Some(api_key) = &api_key {
-            req_builder = req_builder.bearer_auth(api_key.clone());
+            if api_key == "USE_ENTRA_ID" {
+                let token = provider.bearer_token().await?;
+                req_builder = req_builder.bearer_auth(token);
+            } else {
+                req_builder = req_builder.bearer_auth(api_key.clone());
+            }
         }
         let res = req_builder
             .header(reqwest::header::ACCEPT, "text/event-stream")
