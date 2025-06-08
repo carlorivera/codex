@@ -126,6 +126,7 @@ pub(crate) async fn stream_chat_completions(
     let mut attempt = 0;
     loop {
         attempt += 1;
+
         let mut req_builder = client.post(&url);
         if let Some(api_key) = &api_key {
             if api_key == "USE_ENTRA_ID" {
