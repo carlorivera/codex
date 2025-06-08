@@ -84,18 +84,21 @@ impl ModelProviderInfo {
         use azure_core::credentials::TokenCredential;
         use azure_identity::DefaultAzureCredential;
 
-        let credential = DefaultAzureCredential::new()
-            .map_err(|e| crate::error::CodexErr::EnvVar(EnvVarError {
+        let credential = DefaultAzureCredential::new().map_err(|e| {
+            crate::error::CodexErr::EnvVar(EnvVarError {
                 var: "USE_ENTRA_ID".to_string(),
                 instructions: Some(e.to_string()),
-            }))?;
+            })
+        })?;
         let token = credential
             .get_token(&["https://cognitiveservices.azure.com/.default"])
             .await
-            .map_err(|e| crate::error::CodexErr::EnvVar(EnvVarError {
-                var: "USE_ENTRA_ID".to_string(),
-                instructions: Some(e.to_string()),
-            }))?;
+            .map_err(|e| {
+                crate::error::CodexErr::EnvVar(EnvVarError {
+                    var: "USE_ENTRA_ID".to_string(),
+                    instructions: Some(e.to_string()),
+                })
+            })?;
         Ok(token.token.secret().to_string())
     }
 }
