@@ -126,6 +126,8 @@ pub(crate) async fn stream_chat_completions(
     let mut attempt = 0;
     loop {
         attempt += 1;
+        
+        println!("base_url = {:?}", base_url);
 
         let mut req_builder = client.post(&url);
         if let Some(api_key) = &api_key {
