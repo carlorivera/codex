@@ -17,6 +17,20 @@ You can also download a platform-specific release directly from our [GitHub Rele
 
 Codex supports a rich set of configuration options. See [`config.md`](./config.md) for details.
 
+### Azure OpenAI Support
+
+Codex includes a built‑in `azure` model provider. Set `model_provider = "azure"`
+in your `config.toml` and define `AZURE_OPENAI_KEY` in the environment. Use your
+Azure OpenAI API key as the value or set it to `USE_ENTRA_ID` to authenticate via
+Microsoft Entra ID (AAD). When using Entra ID ensure the Azure CLI is logged in
+with `az login` so `DefaultAzureCredential` can acquire a token.
+
+You can test the integration with:
+
+```shell
+codex --config model_provider="azure" --model <model>
+```
+
 ## Model Context Protocol Support
 
 Codex CLI functions as an MCP client that can connect to MCP servers on startup. See the [`mcp_servers`](./config.md#mcp_servers) section in the configuration documentation for details.
